@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI in Peer Review: the Good, the Bad and a Path Forward  -- Study Tracker</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #1a1a1a;
+    --muted: #5f6368;
+    --border: #e2e2e2;
+    --accent: #2c5f8a;
+    --tier1: #e8f4ea;
+    --tier1-text: #1e6b34;
+    --tier2: #fff4e0;
+    --tier2-text: #8a5a00;
+    --tier3: #fbe9e9;
+    --tier3-text: #a13030;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  header {
+    background: linear-gradient(135deg, #1f3b57, #2c5f8a);
+    color: white;
+    padding: 2.5rem 1.5rem 2rem;
+  }
+  header .inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  header h1 {
+    margin: 0 0 0.4rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  header p {
+    margin: 0.2rem 0;
+    color: rgba(255,255,255,0.85);
+    max-width: 760px;
+    font-size: 0.98rem;
+  }
+  .meta-bar {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0.9rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.6rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .meta-bar strong { color: var(--text); }
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem 1.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h2 {
+    margin-top: 0;
+    font-size: 1.15rem;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+  .controls input[type="text"] {
+    flex: 1;
+    min-width: 220px;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  .tier-filter {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .tier-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: white;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .tier-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  thead th {
+    text-align: left;
+    padding: 0.6rem 0.7rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: var(--accent); }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:hover { background: #f7f9fb; }
+  td {
+    padding: 0.7rem;
+  }
+  .study-name {
+    font-weight: 600;
+  }
+  .study-name a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .study-name a:hover { text-decoration: underline; }
+  .study-title {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.8rem;
+    display: block;
+    margin-top: 0.15rem;
+  }
+  .study-title a { color: var(--accent); text-decoration: none; }
+  .study-title a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.t1 { background: var(--tier1); color: var(--tier1-text); }
+  .badge.t2 { background: var(--tier2); color: var(--tier2-text); }
+  .badge.t3 { background: var(--tier3); color: var(--tier3-text); }
+  .findings {
+    font-size: 0.82rem;
+  }
+  .findings .pos { color: #1e6b34; }
+  .findings .neg { color: #a13030; }
+  .no-results {
+    text-align: center;
+    color: var(--muted);
+    padding: 2rem;
+  }
+  footer {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  footer a { color: var(--accent); }
+  .count-line {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="inner">
+    <h1>AI in Peer Review: the Good, the Bad and a Path Forward  -- Study Tracker</h1>
+    <p>Companion to <em>"AI for Peer Review: the Good, the Bad and a Path Forward"</em> (Islamaj, Comeau, Yeganova, Tian, Kim, Lemberger, Gashteovski &amp; Lu). This page tracks empirical qualitative studies on AI use in scientific peer review, mapped where relevant to the three-tier AI-in-Peer-Review adoption framework.</p>
+  </div>
+</header>
+
+<div class="meta-bar">
+  <span><strong>Last updated:</strong> <span id="last-updated">2026-08-19</span></span>
+  <span><strong>Studies tracked:</strong> <span id="study-count-header"></span></span>
+  <span><strong>Source paper:</strong> see repository README for citation</span>
+</div>
+
+<main>
+  <div class="card">
+    <h2>How this page works</h2>
+    <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 0;">
+      This table reproduces and extends Supplementary Table 1 from the manuscript. New studies are added periodically as they are published; see the repository <code>README.md</code> for how to propose an addition. Tier tags reflect where each study's findings contribute in the three-tier framework (Tier 1: automated verification, Tier 2: supervised assistance, Tier 3: human-led judgment). Many studies findings cover more than one tier. Positive findings are marked in green, and negative findings are marked in red.
+    </p>
+    <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 0;">
+      To suggest a study for inclusion, open an issue or pull request against this repository following the format in <code>studies-data.js</code>. This page is a research resource.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="controls">
+      <input type="text" id="search-box" placeholder="Search by author, model, venue, or keyword...">
+      <div class="tier-filter" id="tier-filter">
+        <button class="tier-btn active" data-tier="all">All</button>
+        <button class="tier-btn" data-tier="t1">Tier 1</button>
+        <button class="tier-btn" data-tier="t2">Tier 2</button>
+        <button class="tier-btn" data-tier="t3">Tier 3</button>
+      </div>
+    </div>
+    <div class="count-line" id="count-line"></div>
+    <div style="overflow-x:auto;">
+      <table id="studies-table">
+        <thead>
+          <tr>
+            <th data-key="date">Date</th>
+            <th data-key="study">Study</th>
+            <th data-key="design">Design / Corpus</th>
+            <th data-key="models">Model(s)</th>
+            <th data-key="tier">Tier(s)</th>
+            <th data-key="findings">Key findings</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="no-results" id="no-results" style="display:none;">No studies match your filters.</div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Please refer to "AI for Peer Review: the Good, the Bad and a Path Forward." To suggest a study for inclusion, open an issue or pull request against this repository following the format in <code>studies-data.js</code>. This page is a research resource.</p>
+</footer>
+
+<script>
+const studies = [
+  {
+    date: "2023-05",
+    author: "Donker",
+    title: "The dangers of using large language models for peer review",
+    url: "https://doi.org/10.1016/S1473-3099(23)00290-6",
+    venue: "Lancet Infect Dis",
+    design: "Observational case study; single preprint (author's own manuscript, to avoid confidentiality risk)",
+    models: "GPT-3.5",
+    tiers: ["t2","t3"],
+    pos: ["Accurate summary"],
+    neg: ["Hallucinated methodological criticism (attributed unused statistical tests)", "Fabricated references with real author names", "Refused to write a negative review", "Could not independently identify a critical flaw"]
+  },
+  {
+    date: "2023-06",
+    author: "Liu & Shah",
+    title: "ReviewerGPT? An exploratory study on using large language models for paper reviewing",
+    url: "https://arxiv.org/abs/2306.00622",
+    venue: "arXiv",
+    design: "Task evaluation; 13 papers with planted errors; 15 NeurIPS checklist papers; 10 abstract pairs",
+    models: "GPT-4",
+    tiers: ["t1","t3"],
+    pos: ["Detected errors in CS papers (54% of cases)", "Verified NeurIPS checklists (87% accuracy)"],
+    neg: ["Influenced by bombastic language and superficial cues", "Outputs false claims and fabricated comparisons"]
+  },
+  {
+    date: "2024-01",
+    author: "D'Arcy et al.",
+    title: "MARG: Multi-agent review generation for scientific papers",
+    url: "https://arxiv.org/abs/2401.04259",
+    venue: "arXiv",
+    design: "System evaluation + user study; 30 papers (automated); user study with 9 researchers",
+    models: "GPT-4-based agents",
+    tiers: ["t2"],
+    pos: ["Generic comments reduced (60% → 29%)", "More specific, section-level feedback", "Processes long papers beyond single-context limits"],
+    neg: []
+  },
+  {
+    date: "2024-02",
+    author: "Saad et al.",
+    title: "Exploring the potential of ChatGPT in the peer review process: An observational study",
+    url: "https://doi.org/10.1016/j.dsx.2024.102946",
+    venue: "Diabetes Metab Syndr",
+    design: "Human vs AI comparison; 21 peer-reviewed research articles",
+    models: "GPT-3.5; GPT-4",
+    tiers: ["t3"],
+    pos: [],
+    neg: ["Poor human-AI agreement", "AI reviews not correlated with final decision", "High leniency"]
+  },
+  {
+    date: "2024-06",
+    author: "Suleiman et al.",
+    title: "Assessing ChatGPT's ability to emulate human reviewers in scientific research",
+    url: "https://doi.org/10.1016/j.cmpb.2024.108313",
+    venue: "Comput Methods Programs Biomed",
+    design: "Human vs AI comparison; 20 medical articles; 720 human comments",
+    models: "GPT-4",
+    tiers: ["t3"],
+    pos: [],
+    neg: ["78.5% human–AI disagreement", "Lowest similarity on methodology (3.6%)"]
+  },
+  {
+    date: "2024-07",
+    author: "Liang et al.",
+    title: "Can large language models provide useful feedback on research papers? A large-scale empirical analysis",
+    url: "https://doi.org/10.1056/AIoa2400196",
+    venue: "NEJM AI",
+    design: "Large-scale overlap analysis + user study; 3,096 Nature papers; 1,709 ICLR papers",
+    models: "GPT-4; Llama-2 (70B); Falcon (40B)",
+    tiers: ["t2","t3"],
+    pos: ["AI–human overlap ≈ human–human overlap", "Paper-specific, helpful feedback; improves clarity"],
+    neg: ["Weak on novelty and soundness assessment"]
+  },
+  {
+    date: "2024-07",
+    author: "Liang et al.",
+    title: "Monitoring AI-modified content at scale: a case study on the impact of ChatGPT on AI conference peer reviews",
+    url: "https://proceedings.mlr.press/v235/liang24b.html",
+    venue: "ICML",
+    design: "Ecosystem audit; thousands of reviews from ICLR, NeurIPS, CoRL, EMNLP",
+    models: "N/A (corpus analysis)",
+    tiers: ["t2"],
+    pos: ["Establishes baseline for detecting AI-modified content at scale"],
+    neg: ["Less specific feedback; fewer citations", "Homogenization of review content; reduced epistemic diversity"]
+  },
+  {
+    date: "2024-12",
+    author: "Bougie & Watanabe",
+    title: "Generative adversarial reviews: When LLMs become the critic",
+    url: "https://arxiv.org/abs/2412.10415",
+    venue: "arXiv",
+    design: "Simulation / acceptance prediction; 1,000 NeurIPS + 1,000 ICLR papers",
+    models: "GPT-4o; GPT-4o-mini; Llama-3.1 agents",
+    tiers: ["t3"],
+    pos: ["Predicts acceptance comparably to humans (F1 ~0.66)", "Stronger alignment on experiments and results"],
+    neg: ["Underrepresents novelty/contribution", "Potential training data contamination"]
+  },
+  {
+    date: "2025-02",
+    author: "Shopovski et al.",
+    title: "Revolutionizing Peer Review: A Comparative Analysis of ChatGPT and Human Review Reports",
+    url: "https://www.preprints.org/manuscript/202502.0058/v1",
+    venue: "Preprints",
+    design: "Human vs AI comparison; 198 manuscripts; 512 human reports",
+    models: "GPT-4",
+    tiers: ["t3"],
+    pos: [],
+    neg: ["Inflated scores; never recommended rejection", "Less rigorous critique", "Insufficient accept/reject discrimination"]
+  },
+  {
+    date: "2025-03",
+    author: "Joachim et al.",
+    title: "How Artificial Intelligence Differs From Humans in Peer Review",
+    url: "https://doi.org/10.1016/j.joms.2025.03.015",
+    venue: "J Oral Maxillofac Surg",
+    design: "Architecture comparison; 22 oral & maxillofacial surgery manuscripts",
+    models: "GPT-4o; GPT-o1; Claude 3.5; Gemini 1.5",
+    tiers: ["t1","t3"],
+    pos: ["High internal consistency across models", "Subject-scope assessment"],
+    neg: ["Weak experimental design evaluation", "Cannot assess figures", "High acceptance rate; artificial consensus", "Limited originality discrimination"]
+  },
+  {
+    date: "2025-06",
+    author: "Zhu et al.",
+    title: "Evaluating the potential risks of employing large language models in peer review",
+    url: "https://doi.org/10.1002/ctd2.70067",
+    venue: "Clinical and Translational Discovery",
+    design: "Risk / misuse study; 20 cancer biology manuscripts (eLife)",
+    models: "Claude 2.0",
+    tiers: ["t1","t2"],
+    pos: ["College-level readability; professional tone", "Citation verification capability"],
+    neg: ["Sensitive to prompt formulation", "Vulnerable to adversarial manipulation"]
+  },
+  {
+    date: "2025-07",
+    author: "Marrella et al.",
+    title: "Comparing AI-generated and human peer reviews: A study on 11 articles",
+    url: "https://doi.org/10.1016/j.hansur.2025.102225",
+    venue: "Hand Surg Rehabil",
+    design: "Human vs AI comparison; 11 hand surgery articles; 31 human reviews",
+    models: "GPT-4o; GPT-o1",
+    tiers: ["t1","t3"],
+    pos: ["Follows ARCADIA structured checklist"],
+    neg: ["Extreme leniency; 95–98% acceptance rate", "Hallucinations and fabricated references"]
+  },
+  {
+    date: "2025-11",
+    author: "Manrai et al.",
+    title: "Accelerating Science with Human+AI Review (NEJM AI \"Fast Track\")",
+    url: "https://doi.org/10.1056/AIe2501175",
+    venue: "NEJM AI",
+    design: "Human+AI parallel workflow; 2 RCT manuscripts; provisional decision within 7 days",
+    models: "GPT-5 (Thinking); Gemini 2.5 Pro",
+    tiers: ["t1","t2"],
+    pos: ["Effective on guideline checklists and statistical checks (with human oversight)", "Overlapping critiques with human reviewers; accelerates editorial pace"],
+    neg: ["Some follow-up off-target", "Methodological judgment limited; susceptible to automation/confirmation bias"]
+  },
+  {
+    date: "2025-12",
+    author: "Pichappan & Pichappan",
+    title: "Can AI Replace Human Peer Reviewers? A Comparative Analysis",
+    url: "https://www.dline.info/ojs/index.php/jdim/article/view/560",
+    venue: "J Digital Information Management",
+    design: "Human vs AI comparison; 62 manuscripts; 141 reviews; 12 quality criteria",
+    models: "ChatGPT-3.5; Perplexity; Qwen-3 Max; DeepSeek",
+    tiers: ["t1","t3"],
+    pos: ["Summarization and formatting", "Surface-level clarity assessment"],
+    neg: ["Leniency", "Limited depth, subtlety, and contextual understanding", "Weak methodological critique"]
+  },
+  {
+    date: "2026-01",
+    author: "Bianchi et al.",
+    title: "Exploring the use of AI authors and reviewers at Agents4Science",
+    url: "https://doi.org/10.1038/s41587-025-02963-8",
+    venue: "Nat Biotechnol",
+    design: "LLM screening → human+AI review; 253 submissions screened; 79 passed to human review; 48 accepted",
+    models: "GPT-5; Gemini 2.5 Pro; Claude Sonnet 4",
+    tiers: ["t1","t2"],
+    pos: ["Identified mistakes and missing information", "Caught numerical discrepancies", "Detected prompt injection and reference hallucinations"],
+    neg: ["Sycophancy (Gemini); human reviewers more skeptical overall"]
+  },
+  {
+    date: "2026-02",
+    author: "Thakkar et al.",
+    title: "A large-scale randomized study of large language model feedback in peer review",
+    url: "https://doi.org/10.1038/s42256-026-01188-x",
+    venue: "Nature Machine Intelligence",
+    design: "RCT; >20,000 ICLR 2025 reviews",
+    models: "Multi-LLM (Claude 3.5 Sonnet backbone)",
+    tiers: ["t2"],
+    pos: ["Increased review length and specificity", "More constructive author–reviewer dialogue"],
+    neg: ["Risk of nitpicking", "Models struggle with nuanced scientific value; quality not uniform across paper types"]
+  },
+  {
+    date: "2026-02",
+    author: "Lemberger et al.",
+    title: "How do authors want to use AI for review?",
+    url: "https://doi.org/10.1038/s44319-026-00725-4",
+    venue: "EMBO Reports",
+    design: "Author survey; 109 responses; AI + human reviews from q.e.d. platform v1.0",
+    models: "q.e.d. platform v1.0",
+    tiers: ["t2"],
+    pos: ["Preferred as pre-submission self-check tool", "Useful for logical gaps and inconsistencies", "Clarity and politeness on par with humans"],
+    neg: ["Concerns about homogenization and missing unconventional contributions"]
+  },
+  {
+    date: "2026-03",
+    author: "Li et al.",
+    title: "Large language models for peer review in biotechnology",
+    url: "https://doi.org/10.1016/j.nbt.2026.03.007",
+    venue: "N Biotechnol",
+    design: "Systematic evaluation, domain-specific; 763 preprints (bioRxiv/arXiv); 12 NSF grant proposals; 100 published papers",
+    models: "GPT-5; Qwen-Plus; Gemini 2.5 Pro",
+    tiers: ["t1","t2","t3"],
+    pos: ["Well-structured comments; 91% fewer off-topic comments than human reviewers", "Flagged plausible but incorrect scientific statements (error-injection check)"],
+    neg: ["Systematic leniency on grant proposals; no outright rejections", "34% less likely to comment on positioning/citations", "Homogenized vocabulary not reliably detected by GPTZero", "Citation impact prediction below 50%; anchoring on prior human reviews", "Cannot assess PI history, visual data, or field-specific norms"]
+  },
+  {
+    date: "2026-04",
+    author: "Biswas et al.",
+    title: "AI-Assisted Peer Review at Scale: The AAAI-26 AI Review Pilot",
+    url: "https://arxiv.org/abs/2604.13940",
+    venue: "arXiv",
+    design: "Full-scale live deployment + community survey + benchmark; 22,977 AAAI-26 submissions; 5,834 survey responses; SPECS benchmark (783 synthetic perturbations)",
+    models: "GPT-5 (multi-stage pipeline; code interpreter; web search)",
+    tiers: ["t1","t2","t3"],
+    pos: ["Operationally feasible at conference scale (<$1/paper, <24 hours)", "Preferred over human reviews on technical error detection, thoroughness, research suggestions", "Complementary strengths with human reviewers", "Multi-stage pipeline outperforms single-prompt baseline"],
+    neg: ["Weak big-picture judgment on novelty, significance, impact", "Nitpicking and overemphasis on minor issues", "Excessive verbosity", "Shallow contextual/domain understanding", "Factual errors, esp. equations/tables"]
+  },
+  {
+    date: "2026-05",
+    author: "Kim et al.",
+    title: "On the limits and opportunities of AI reviewers: Reviewing the reviews of Nature-family papers with 45 expert scientists",
+    url: "https://arxiv.org/abs/2605.20668",
+    venue: "arXiv",
+    design: "Expert annotation study + benchmark; 45 domain scientists; 469 hours; 2,960 review items from 82 Nature-family papers",
+    models: "GPT-5.2; Claude Opus 4.5; Gemini 3.0 Pro (+ additional frontier models in benchmark)",
+    tiers: ["t2","t3"],
+    pos: ["GPT-5.2 exceeded top-rated human reviewer on composite \"fully positive\" rate (60.0% vs 48.2%, p=0.009)", "Surfaced distinct issues missed by humans (26% of AI items had no human counterpart)", "Strengths in code inspection, statistical/methodological rigor, cross-reference checking"],
+    neg: ["Lower factual correctness than top-rated human reviewers", "AI–AI overlap much higher than human–human overlap", "Limited field-norm calibration; long-context failures; over-critical/nitpicking"]
+  }
+];
+
+function tierBadge(t) {
+  const labels = { t1: "Tier 1", t2: "Tier 2", t3: "Tier 3" };
+  return `<span class="badge ${t}">${labels[t]}</span>`;
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('table-body');
+  const noResults = document.getElementById('no-results');
+  tbody.innerHTML = '';
+
+  if (list.length === 0) {
+    noResults.style.display = 'block';
+  } else {
+    noResults.style.display = 'none';
+  }
+
+  list.forEach(s => {
+    const tr = document.createElement('tr');
+    const posHtml = s.pos.map(p => `<div class="pos">+ ${p}</div>`).join('');
+    const negHtml = s.neg.map(n => `<div class="neg">− ${n}</div>`).join('');
+    tr.innerHTML = `
+      <td>${s.date}</td>
+      <td>
+        <div class="study-name">${s.author} <span style="color:var(--muted); font-weight:400;">(${s.venue})</span></div>
+        <span class="study-title"><a href="${s.url}" target="_blank" rel="noopener noreferrer">${s.title} ↗</a></span>
+      </td>
+      <td>${s.design}</td>
+      <td>${s.models}</td>
+      <td>${s.tiers.map(tierBadge).join(' ')}</td>
+      <td class="findings">${posHtml}${negHtml}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('count-line').textContent = `Showing ${list.length} of ${studies.length} studies`;
+}
+
+function applyFilters() {
+  const query = document.getElementById('search-box').value.toLowerCase();
+  const activeTier = document.querySelector('.tier-btn.active').dataset.tier;
+
+  const filtered = studies.filter(s => {
+    const matchesTier = activeTier === 'all' || s.tiers.includes(activeTier);
+    const haystack = `${s.author} ${s.title} ${s.venue} ${s.models} ${s.design}`.toLowerCase();
+    const matchesQuery = haystack.includes(query);
+    return matchesTier && matchesQuery;
+  });
+
+  renderTable(filtered);
+}
+
+document.getElementById('search-box').addEventListener('input', applyFilters);
+
+document.querySelectorAll('.tier-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilters();
+  });
+});
+
+let sortKey = null;
+let sortAsc = true;
+document.querySelectorAll('th[data-key]').forEach(th => {
+  th.addEventListener('click', () => {
+    const key = th.dataset.key;
+    if (sortKey === key) { sortAsc = !sortAsc; } else { sortKey = key; sortAsc = true; }
+    const sorted = [...studies].sort((a, b) => {
+      let av, bv;
+      if (key === 'study') { av = a.author; bv = b.author; }
+      else if (key === 'design') { av = a.design; bv = b.design; }
+      else if (key === 'models') { av = a.models; bv = b.models; }
+      else if (key === 'tier') { av = a.tiers[0] || ''; bv = b.tiers[0] || ''; }
+      else if (key === 'findings') { av = a.pos.length + a.neg.length; bv = b.pos.length + b.neg.length; }
+      else { av = a.date; bv = b.date; }
+      if (av < bv) return sortAsc ? -1 : 1;
+      if (av > bv) return sortAsc ? 1 : -1;
+      return 0;
+    });
+    renderTable(sorted);
+  });
+});
+
+document.getElementById('study-count-header').textContent = studies.length;
+renderTable(studies);
+</script>
+
+</body>
+</html>
